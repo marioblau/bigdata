@@ -2,8 +2,11 @@
 .Rhistory
 .Rapp.history
 
-# Session Data files
+# Session data files
 .RData
+
+# Large csv files in data directory
+data/*.csv
 
 # User-specific files
 .Ruserdata
