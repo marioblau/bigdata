@@ -1,0 +1,40 @@
+---
+title: "Disposition - DDOS Anomaly Detection"
+author: Blue Data (Mario Blauensteiner, Stefan Diener, Heyu David Zhang)
+date: 26/03/2021
+output: pdf_document
+---
+## Motivation
+Distributed Denial of service (DDoS) attacks are a growing threat to Internet Service Providers (ISPs). An increasing availability of DDoS-for-hire services and of unsecured IoT devices and botnets cause these attacks to grow in in magnitude, frequency, and sophistication.
+With this project, we aim to test different approaches to develop a machine learning based anomaly detection algorithm, that is able to flag DDoS attacks among a stream of benign web traffic.
+
+## Data Set
+We are using the ddos-dataset from Kaggle (https://www.kaggle.com/devendra416/ddos-datasets).
+
+The data set is a collection of DDoS and "benign" webtrafic flows from different years and different DDoS traffic generation tools.
+
+The dataset contains 12'794'627 data points, where each point corresponds to one flow, either in the forward (source to destination) or backward (destination to source) directions.
+
+In addition to the DDoS / benign label, it contains 83 statistical features such as Duration, Number of packets, Number of bytes, Length of packets, etc. that are also calculated separately in the forward and reverse direction.
+
+
+## Methodology
+To detect the anomalies, we aim to employ different classification models, including Naive Bayes as a more simple approach baseline model, k-Nearest Neighbors (kNN) as clustering approach, and tree-based algorithms like decision trees and random forest.
+
+The models will then be evaluated on the common classification metrics accuracy, precision, recall and f1-score.
+
+```{r head, include=FALSE}
+library(tidyverse)
+library(pryr)
+library(data.table)
+DATA_PATH <- "../bigdata/data/unbalaced_20_80_dataset.csv"
+# DATA IMPORT ----------------
+mem_change(df <- fread(DATA_PATH))
+```
+
+
+## Complete dataset preview:
+```{r}
+df %>% head(6)
+```
+
