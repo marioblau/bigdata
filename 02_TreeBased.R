@@ -14,22 +14,18 @@ SAMPLE <- TRUE
 SAMPLE_FRAC <- 0.01
 
 
-# DATA IMPORT ----------------
+# LOAD DATA ----------------
 mem_change(df <- fread(DATA_PATH))
 
 if(SAMPLE== TRUE){
-  mem_change(df_smpl <- df %>% sample_frac(SAMPLE_FRAC))
-  mem_change(rm(df))
+  mem_change(df <- df %>% sample_frac(SAMPLE_FRAC))
+  # mem_change(rm(df))
 }
 
 gc()
 
 df %>% colnames
-summary(df)
+summary(df$Label)
+class(df)
 
-# PREPROCESSING ----------------
-
-# convert Label to numeric
-df <- df %>%
-  mutate(Label01 = as.numeric(as.factor(Label))-1)  # -1 to convert labels from (1,2) to (0,1)
-
+df$Label %>% head(6)
