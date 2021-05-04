@@ -12,6 +12,9 @@ DATA_PATH <- "../bigdata/data/final_dataset.csv"  # original balanced
 SAVE_PATH <- "../bigdata/data/final_dataset_preprocessed.csv"  #
 SAVE_PATH_SMPL <- "data/final_dataset_preprocessed_sample.csv"  #
 
+#stef change Path
+SAVE_PATH_SMPL_SCALED <- "C:/Users/mario/Desktop/MBF_St.Gallen/2. Semester/Big_data_analytics/Dataset_02_05/final_dataset_preprocessed_sample_scaled.csv" 
+
 # LOAD DATA ----------------
 df_all <- fread(DATA_PATH)
 df <- df_all %>% sample_frac(0.01) #TODO select SAMPLE (y/n)
@@ -77,4 +80,24 @@ df <- df_temp # replace original df!
 #df %>% sapply(., is.finite) %>% colSums() == nrow(df) # are all columns finite?
 
 # SAVE ------------
-fwrite(df, SAVE_PATH_SMPL) #TODO select SAMPLE (y/n)
+fwrite(df, SAVE_PATH_SMPL) #TODO select SAMPLE (y/n)  #save sample dataset to visualize
+
+
+#stef delete line below -----
+Path_mario <- "C:/Users/mario/Desktop/MBF_St.Gallen/2. Semester/Big_data_analytics/Dataset_02_05/final_dataset_preprocessed_sample.csv" #delete
+df <- fread(Path_mario) #delete
+----
+
+
+# SCALING
+df_scaled <- df
+df_scaled <- as.data.frame(scale(df_scaled))
+df_scaled[,c(1)] <- df[,c(1)]
+
+# SAVE ------------
+fwrite(df_scaled, SAVE_PATH_SMPL_SCALED) #TODO select SAMPLE (y/n)  #save sample scaled dataset 
+
+
+
+
+
