@@ -1,3 +1,4 @@
+# Ideen aus der VL
 ##Kapitel 1: Zeit-Gliederung für Code (mit profvis) -> begründung wieso wir einen teil verbessert haben
 ##Kapitel 2: Vergleich Datensatz vor und nach Preprocessing (e.g. char -> int umwandlung)(mem_change(), mem_used(),compare_size())
 Kapitel 2: Hyperparameter bei algo (zb RF) anpassen, und über runtime-accuracy trade-off reden (runtime zwischen beiden auf sample datensatz)

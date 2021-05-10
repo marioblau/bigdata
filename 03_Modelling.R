@@ -3,26 +3,32 @@
 #-------------------------------------------------------------------------------------
 # Packages and settings
 rm(list = ls())
-library(tidyverse)
-library(pryr)
-library(data.table)
 
-# Packages ML models
-library(rpart)
-library(rpart.plot)
-library(caret)
-library(randomForest)
-library(xgboost)
-library(class)
-library(e1071)
+suppressPackageStartupMessages({  # TODO: (stef) Wrap skript in 'profvis' function
+  library(tidyverse)
+  library(pryr)
+  library(data.table)
 
-# Package parallel computing
-library(doParallel) #https://www.geeksforgeeks.org/random-forest-with-parallel-computing-in-r-programming/
+  # Packages ML models
+  library(rpart)
+  library(rpart.plot)
+  library(caret)
+  library(randomForest)
+  library(xgboost)
+  library(class)
+  library(e1071)
 
+  # Package parallel computing
+  library(doParallel) #https://www.geeksforgeeks.org/random-forest-with-parallel-computing-in-r-programming/
+
+  # runtime analysis
+  library(profvis)
+})
 
 # LOAD DATA ----------------
-#DATA_PATH <- "data/final_dataset_preprocessed_sample.csv" #TODO sample
-DATA_PATH <- "C:/Users/mario/Desktop/MBF_St.Gallen/2. Semester/Big_data_analytics/Dataset_02_05/final_dataset_preprocessed_sample_scaled.csv" 
+#DATA_PATH <- "C:/Users/mario/Desktop/MBF_St.Gallen/2. Semester/Big_data_analytics/Dataset_02_05/final_dataset_preprocessed_sample_scaled.csv"
+DATA_PATH <- "data/final_dataset_preprocessed_sample_scaled.csv"
+
 df <- fread(DATA_PATH)
 
 # TRAIN TEST SPLIT ----------------
@@ -34,102 +40,92 @@ save(train, test, file = "results/scaled/train_test.RData")
 
 
 # DECISION TREE --------------
+print(paste("Training Decision Tree", Sys.time()))
+
 #without parallelization
-start.time<-proc.time()
-dt <- rpart(Label ~ ., data = train, method = "class")
-stop.time<-proc.time()
-run.time<-stop.time -start.time
-print(run.time)
+system.time({
+  dt <- rpart(Label ~ ., data = train, method = "class")
+})
 
 #with parallelization
 cl<-makePSOCKcluster(4)
 registerDoParallel(cl, cores = detectCores(all.tests = FALSE, logical = TRUE))
-start.time<-proc.time()
-dt <- rpart(Label ~ ., data = train, method = "class")
-stop.time<-proc.time()
-run.time<-stop.time -start.time
-print(run.time)
-stopCluster(cl)
 
+system.time({
+  dt <- rpart(Label ~ ., data = train, method = "class")
+})
+stopCluster(cl)
 
 #save(dt, file = "results/decisiontree.RData")
 save(dt, file = "results/scaled/decisiontree.RData")
 
-
-
 # RANDOM FOREST ----------
+print(paste("Training Random Forest", Sys.time()))
+
 #without parallelization
-start.time<-proc.time()
-rf <- randomForest(as.factor(Label) ~ ., data = train)
-stop.time<-proc.time()
-run.time<-stop.time -start.time
-print(run.time)
+system.time({
+  rf <- randomForest(as.factor(Label) ~ ., data = train)
+})
 
 #with parallelization
 cl<-makePSOCKcluster(4)
 registerDoParallel(cl, cores = detectCores(all.tests = FALSE, logical = TRUE))
-start.time<-proc.time()
-rf <- randomForest(as.factor(Label) ~ ., data = train)
-stop.time<-proc.time()
-run.time<-stop.time -start.time
-print(run.time)
+
+system.time({
+  rf <- randomForest(as.factor(Label) ~ ., data = train)
+})
 stopCluster(cl)
 
-
-#rf <- randomForest(as.factor(Label) ~ ., data = train)
-#save(rf, file = "results/randomforest.RData")
+# save
 save(rf, file = "results/scaled/randomforest.RData")
 
 
-
 # XG-BOOST ----------
+print(paste("Training XG-Boost", Sys.time()))
+
 train_mat <- as.matrix(train)
 test_mat <- as.matrix(test)
 train_dmat <- xgb.DMatrix(data = train_mat[,-c(1)], label = train_mat[,1])
 test_dmat <- xgb.DMatrix(data = test_mat[,-c(1)], label = test_mat[,1])
 
 #without parallelization
-start.time<-proc.time()
-xgb <- xgboost(data = train_dmat, # the data
-               nround = 2, # max number of boosting iterations
-               objective = "binary:logistic")  # the objective function
-stop.time<-proc.time()
-run.time<-stop.time -start.time
-print(run.time)
+system.time({
+  xgb <- xgboost(data = train_dmat, # the data
+                 nround = 2, # max number of boosting iterations
+                 objective = "binary:logistic")  # the objective function
+})
 
 #with parallelization
-cl<-makePSOCKcluster(4)
-registerDoParallel(cl, cores = detectCores(all.tests = FALSE, logical = TRUE))
-start.time<-proc.time()
-xgb <- xgboost(data = train_dmat, # the data
-               nround = 2, # max number of boosting iterations
-               objective = "binary:logistic")  # the objective function
-stop.time<-proc.time()
-run.time<-stop.time -start.time
-print(run.time)
+  cl<-makePSOCKcluster(4)
+  registerDoParallel(cl, cores = detectCores(all.tests = FALSE, logical = TRUE))
+system.time({
+  xgb <- xgboost(data = train_dmat, # the data
+                 nround = 2, # max number of boosting iterations
+                 objective = "binary:logistic")  # the objective function
+})
 stopCluster(cl)
 
-#save(xgb, file = "results/xgboost.RData")
+#save
 save(xgb, file = "results/scaled/xgboost.RData")
 
 
 
 # LOGISTIC REGRESSION --------
+print(paste("Training Logistic Regression", Sys.time()))
+
 #without parallelization
-start.time<-proc.time()
-glm <- glm(formula = as.factor(Label) ~ ., data = train, family = "binomial")
-stop.time<-proc.time()
-run.time<-stop.time -start.time
-print(run.time)
+system.time({
+  glm <- glm(formula = as.factor(Label) ~ ., data = train, family = "binomial")
+})
 
 #with parallelization
 cl<-makePSOCKcluster(4)
 registerDoParallel(cl, cores = detectCores(all.tests = FALSE, logical = TRUE))
-start.time<-proc.time()
-glm <- glm(formula = as.factor(Label) ~ ., data = train, family = "binomial")
-stop.time<-proc.time()
-run.time<-stop.time -start.time
-print(run.time)
+
+system.time({
+  glm <- glm(formula = as.factor(Label) ~ ., data = train, family = "binomial")
+})
+
 stopCluster(cl)
 
 save(glm, file = "results/scaled/logregression.RData")
@@ -137,78 +133,69 @@ save(glm, file = "results/scaled/logregression.RData")
 
 
 # KNN --------
+print(paste("Training KNN", Sys.time()))
+
 #without parallelization
-start.time<-proc.time()
-knn <- knn(train[,-c(1)],test[,-c(1)],cl=train$Label,k=3,prob=TRUE)
-stop.time<-proc.time()
-run.time<-stop.time -start.time
-print(run.time)
+system.time({
+  knn <- knn(train[,-c(1)],test[,-c(1)],cl=train$Label,k=3,prob=TRUE)
+})
 
 #with parallelization
 cl<-makePSOCKcluster(4)
 registerDoParallel(cl, cores = detectCores(all.tests = FALSE, logical = TRUE))
-start.time<-proc.time()
-knn <- knn(train[,-c(1)],test[,-c(1)],cl=train$Label,k=3,prob=TRUE)
-stop.time<-proc.time()
-run.time<-stop.time -start.time
-print(run.time)
+
+system.time({
+  knn <- knn(train[,-c(1)],test[,-c(1)],cl=train$Label,k=3,prob=TRUE)
+})
+
 stopCluster(cl)
 
-
+# save
 save(knn, file = "results/scaled/knn.RData")
 
 
-
 # Naive Bayes ------------
+print(paste("Training Naive Bayes", Sys.time()))
+
 #without parallelization
-start.time<-proc.time()
-nb <- naiveBayes(x = train[,-c(1)], y = train[,c(1)])
-stop.time<-proc.time()
-run.time<-stop.time -start.time
-print(run.time)
+system.time({
+  nb <- naiveBayes(x = train[,-c(1)], y = train[,c(1)])
+})
 
 #with parallelization
 cl<-makePSOCKcluster(4)
 registerDoParallel(cl, cores = detectCores(all.tests = FALSE, logical = TRUE))
-start.time<-proc.time()
-nb <- naiveBayes(x = train[,-c(1)], y = train[,c(1)])
-stop.time<-proc.time()
-run.time<-stop.time -start.time
-print(run.time)
+
+system.time({
+  nb <- naiveBayes(x = train[,-c(1)], y = train[,c(1)])
+})
 stopCluster(cl)
 
-
-#nb <- naiveBayes(x = train[,-c(1)], y = train[,c(1)])
+# save
 save(nb, file = "results/scaled/nb.RData")
 
 
 
 # SVM --------
+print(paste("Training SVM", Sys.time()))
 #without parallelization
-start.time<-proc.time()
-svm <- svm(formula = Label ~ ., data = train[1:10,], #### only 10 rows
-           type = 'C-classification',
-           kernel = 'linear')
-stop.time<-proc.time()
-run.time<-stop.time -start.time
-print(run.time)
+system.time({
+  svm <- svm(formula = Label ~ ., data = train, #### only 10 rows: train[1:10,]
+             type = 'C-classification',
+             kernel = 'linear')
+})
 
 #with parallelization
 cl<-makePSOCKcluster(4)
 registerDoParallel(cl, cores = detectCores(all.tests = FALSE, logical = TRUE))
-start.time<-proc.time()
-svm <- svm(formula = Label ~ ., data = train[1:10,], #### only 10 rows
-           type = 'C-classification',
-           kernel = 'linear')
-stop.time<-proc.time()
-run.time<-stop.time -start.time
-print(run.time)
+system.time({
+  svm <- svm(formula = Label ~ ., data = train, #### only 10 rows: train[1:10,]
+             type = 'C-classification',
+             kernel = 'linear')
+})
 stopCluster(cl)
 
-
-#svm <- svm(formula = Label ~ ., data = train[1:10,], #### only 10 rows
-#                 type = 'C-classification',
-#                 kernel = 'linear')
+# save
 save(svm, file = "results/scaled/svm.RData")
 
 
