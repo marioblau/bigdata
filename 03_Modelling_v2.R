@@ -37,7 +37,7 @@ p <- profvis({
   df$id <- 1:nrow(df)
   train <- df %>% sample_frac(.95)
   test  <- anti_join(df, train, by = 'id')
-  save(train, test, file = "results/scaled/train_test.RData")
+  save(train, test, file = "results/scaled/train_test_FullDF.RData")
 
 
   # DECISION TREE --------------
@@ -52,7 +52,7 @@ p <- profvis({
   dt <- rpart(Label ~ ., data = train, method = "class")
   stopCluster(cl)
 
-  save(dt, file = "results/scaled/decisiontree.RData")
+  save(dt, file = "results/scaled/decisiontree_FullDF.RData")
 
   # RANDOM FOREST ----------
   print(paste("Training Random Forest", Sys.time()))
@@ -65,7 +65,7 @@ p <- profvis({
   rf <- randomForest(as.factor(Label) ~ ., data = train)
   stopCluster(cl)
 
-  save(rf, file = "results/scaled/randomforest.RData")
+  save(rf, file = "results/scaled/randomforest_FullDF.RData")
 
   # XG-BOOST ----------
   print(paste("Training XG-Boost", Sys.time()))
@@ -88,7 +88,7 @@ p <- profvis({
                  objective = "binary:logistic")  # the objective function
   stopCluster(cl)
 
-  save(xgb, file = "results/scaled/xgboost.RData")
+  save(xgb, file = "results/scaled/xgboost_FullDF.RData")
 
   # LOGISTIC REGRESSION --------
   print(paste("Training Logistic Regression", Sys.time()))
@@ -102,7 +102,7 @@ p <- profvis({
   glm <- glm(formula = as.factor(Label) ~ ., data = train, family = "binomial")
   stopCluster(cl)
 
-  save(glm, file = "results/scaled/logregression.RData")
+  save(glm, file = "results/scaled/logregression_FullDF.RData")
 
 
   # KNN --------
@@ -117,7 +117,7 @@ p <- profvis({
   stopCluster(cl)
 
   # save
-  save(knn, file = "results/scaled/knn.RData")
+  save(knn, file = "results/scaled/knn_FullDF.RData")
 
 
   # Naive Bayes ------------
@@ -133,7 +133,7 @@ p <- profvis({
   stopCluster(cl)
 
   # save
-  save(nb, file = "results/scaled/nb.RData")
+  save(nb, file = "results/scaled/nb_FullDF.RData")
 
 
   # SVM --------
@@ -152,8 +152,8 @@ p <- profvis({
   stopCluster(cl)
 
   # save
-  save(svm, file = "results/scaled/svm.RData")
+  save(svm, file = "results/scaled/svm_FullDF.RData")
 })
 
-htmlwidgets::saveWidget(p, "results/03_Modelling_ProfVis.html")
+htmlwidgets::saveWidget(p, "results/03_Modelling_ProfVis_FullDF.html")
 print(paste("Saved ProfVis Analysis!", Sys.time()))
