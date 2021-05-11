@@ -17,9 +17,10 @@ suppressPackageStartupMessages({
 
 DATA_PATH <- "data/final_dataset.csv"  # original balanced
 
-SAMPLE <- TRUE # TODO Select SAMPLE: (y/n)
+SAMPLE <- FALSE # TODO Select SAMPLE: (y/n)
+SMPL_FRAC <- 0.01
 
-# set save path automatically
+# set save path for final data automatically
 if(SAMPLE == TRUE){
   SAVE_PATH <- "data/final_dataset_preprocessed_sample.csv" # sample
   SAVE_PATH_SCALED <- "data/final_dataset_preprocessed_sample_scaled.csv" # sample
@@ -28,24 +29,31 @@ if(SAMPLE == TRUE){
   SAVE_PATH_SCALED <- "data/final_dataset_preprocessed_scaled.csv" # full data
 }
 
-
 p <- profvis({
   # LOAD DATA ----------------
+  print(paste("Loading Data", Sys.time()))
+
   df_all <- fread(DATA_PATH)
   df <- df_all %>%
-    {if(SAMPLE) sample_frac(.,0.01)} # sample only if SAMPLE variable is true
+    {if(SAMPLE) sample_frac(.,SMPL_FRAC) else .} # sample only if SAMPLE variable is true
 
   # REMOVE SPACE FROM COLNAMES ----------------
+  print(paste("Clean Colnames", Sys.time()))
+
   colnames(df) <- gsub(" ", "_", colnames(df))
   colnames(df) <- gsub("/", "_", colnames(df))
 
 
   # REMOVE COLUMNS WITHOUT VARIANTION --------
+  print(paste("Remove Constant Columns ", Sys.time()))
+
   df <- df %>% select(-c("Fwd_Byts_b_Avg", "Fwd_Pkts_b_Avg", "Fwd_Blk_Rate_Avg", "Fwd_URG_Flags",
                          "Bwd_Byts_b_Avg", "Bwd_Pkts_b_Avg", "Bwd_Blk_Rate_Avg", "Bwd_URG_Flags"))
 
 
   # CONVERT CHARACTER VECTORS TO NUMERIC --------
+  print(paste("Clean Data Types", Sys.time()))
+
   #df %>% sapply(., class)  # Character vectors: Flow ID, Src IP, Dst IP, Timestamp
 
   # Convert dates
@@ -86,6 +94,8 @@ p <- profvis({
     select(Label, everything())
 
   # REMOVE NA / INF VALUES --------------
+  print(paste("Remove NA and Inf Values", Sys.time()))
+
   df_temp <- df %>% drop_na()
   df_temp <- df_temp %>% filter_all(all_vars(!is.infinite(.)))
   (nrow(df) - nrow(df_temp)) / nrow(df) # 476 missing values removed ~0.3 %
@@ -95,17 +105,21 @@ p <- profvis({
   #df %>% sapply(., is.finite) %>% colSums() == nrow(df) # are all columns finite?
 
   # SAVE ------------
+  print(paste("Save Data", Sys.time()))
+
   fwrite(df, SAVE_PATH)
 
   # SCALING ------------
+  print(paste("Scale Data", Sys.time()))
   df_scaled <- df
   df_scaled <- as.data.frame(scale(df_scaled))
   df_scaled[, 1] <- df[, 1]
 
   # SAVE ------------
+  print(paste("Save Scaled Data", Sys.time()))
   fwrite(df_scaled, SAVE_PATH_SCALED)
 })
-htmlwidgets::saveWidget(p, "results/01_Preprocessing_ProfVis.html")
+htmlwidgets::saveWidget(p, "results/01_Preprocessing_ProfVis_FullData.html")
 print(paste("Saved ProfVis Analysis!", Sys.time()))
 
 
