@@ -3,7 +3,6 @@
 #-------------------------------------------------------------------------------------
 # Packages and settings
 rm(list = ls())
-
 suppressPackageStartupMessages({
   library(tidyverse)
   library(pryr)
@@ -26,14 +25,16 @@ suppressPackageStartupMessages({
   library(htmlwidgets)  # requires to install pandoc! --> https://pandoc.org/installing.html
 })
 
+#DATA_PATH <- "C:/Users/mario/Desktop/MBF_St.Gallen/2. Semester/Big_data_analytics/Dataset_02_05/final_dataset_preprocessed_sample_scaled.csv"
+DATA_PATH <- "data/final_dataset_preprocessed_scaled.csv"
 
 p <- profvis({
   # LOAD DATA ----------------
-  #DATA_PATH <- "C:/Users/mario/Desktop/MBF_St.Gallen/2. Semester/Big_data_analytics/Dataset_02_05/final_dataset_preprocessed_sample_scaled.csv"
-  DATA_PATH <- "data/final_dataset_preprocessed_sample_scaled.csv"
+  print(paste("Loading data...", Sys.time()))
   df <- fread(DATA_PATH)
 
   # TRAIN TEST SPLIT ----------------
+  print(paste("Create train-test split...", Sys.time()))
   df$id <- 1:nrow(df)
   train <- df %>% sample_frac(.95)
   test  <- anti_join(df, train, by = 'id')

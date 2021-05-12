@@ -29,7 +29,7 @@ if(SAMPLE == TRUE){
   SAVE_PATH_SCALED <- "data/final_dataset_preprocessed_scaled.csv" # full data
 }
 
-p <- profvis({
+p <- profvis({ # sample rate = 10ms
   # LOAD DATA ----------------
   print(paste("Loading Data", Sys.time()))
 
