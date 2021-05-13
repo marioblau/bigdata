@@ -156,5 +156,5 @@ p <- profvis({
   save(svm, file = "results/scaled/svm_FullDF.RData")
 })
 
-htmlwidgets::saveWidget(p, "results/03_Modelling_ProfVis_FullDF.html")
+htmlwidgets::saveWidget(p, "ProfVis/03_Modelling_ProfVis_FullDF.html")
 print(paste("Saved ProfVis Analysis!", Sys.time()))

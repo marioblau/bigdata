@@ -17,18 +17,19 @@ suppressPackageStartupMessages({
 
 DATA_PATH <- "data/final_dataset.csv"  # original balanced
 
-SAMPLE <- FALSE # TODO Select SAMPLE: (y/n)
-SMPL_FRAC <- 0.01
+SAMPLE <- TRUE # TODO Select SAMPLE: (y/n)
+SMPL_FRAC <- 1 # 0.01, 0.1, 0.2, ... 0.9, 1.0
+
 
 # set save path for final data automatically
 if(SAMPLE == TRUE){
-  SAVE_PATH <- "data/final_dataset_preprocessed_sample.csv" # sample
-  SAVE_PATH_SCALED <- "data/final_dataset_preprocessed_sample_scaled.csv" # sample
+  SAVE_PATH <- paste0("data/final_dataset_preprocessed_sample",SMPL_FRAC*100,".csv") # sample
+  SAVE_PATH_SCALED <- paste0("data/final_dataset_preprocessed_sample",SMPL_FRAC*100,"_scaled.csv") # sample
 }else{
   SAVE_PATH <- "data/final_dataset_preprocessed.csv" # full data
   SAVE_PATH_SCALED <- "data/final_dataset_preprocessed_scaled.csv" # full data
 }
-
+print(paste0("Start Preprocessing on ", SMPL_FRAC*100, "% of data ", Sys.time()))
 p <- profvis({ # sample rate = 10ms
   # LOAD DATA ----------------
   print(paste("Loading Data", Sys.time()))
@@ -36,6 +37,7 @@ p <- profvis({ # sample rate = 10ms
   df_all <- fread(DATA_PATH)
   df <- df_all %>%
     {if(SAMPLE) sample_frac(.,SMPL_FRAC) else .} # sample only if SAMPLE variable is true
+  rm(df_all) # remove large df from memory
 
   # REMOVE SPACE FROM COLNAMES ----------------
   print(paste("Clean Colnames", Sys.time()))
@@ -49,7 +51,6 @@ p <- profvis({ # sample rate = 10ms
 
   df <- df %>% select(-c("Fwd_Byts_b_Avg", "Fwd_Pkts_b_Avg", "Fwd_Blk_Rate_Avg", "Fwd_URG_Flags",
                          "Bwd_Byts_b_Avg", "Bwd_Pkts_b_Avg", "Bwd_Blk_Rate_Avg", "Bwd_URG_Flags"))
-
 
   # CONVERT CHARACTER VECTORS TO NUMERIC --------
   print(paste("Clean Data Types", Sys.time()))
@@ -119,9 +120,8 @@ p <- profvis({ # sample rate = 10ms
   print(paste("Save Scaled Data", Sys.time()))
   fwrite(df_scaled, SAVE_PATH_SCALED)
 })
-htmlwidgets::saveWidget(p, "results/01_Preprocessing_ProfVis_FullData.html")
+htmlwidgets::saveWidget(p, paste0("ProfVis/01_Preprocessing_sample",SMPL_FRAC*100,".html"))
 print(paste("Saved ProfVis Analysis!", Sys.time()))
-
 
 
 
