@@ -24,21 +24,26 @@ suppressPackageStartupMessages({
   library(profvis)
   library(htmlwidgets)  # requires to install pandoc! --> https://pandoc.org/installing.html
 })
-
 #DATA_PATH <- "C:/Users/mario/Desktop/MBF_St.Gallen/2. Semester/Big_data_analytics/Dataset_02_05/final_dataset_preprocessed_sample_scaled.csv"
-DATA_PATH <- "data/final_dataset_preprocessed_scaled.csv"
 
+# TODO select sample size
+SMPL_FRAC <- 1 # 0.01, 0.1, 0.2, ... 0.9, 1.0
+
+DATA_PATH <- paste0("data/final_dataset_preprocessed_sample100_scaled.csv")
+
+print(paste0("Start Modelling on ", SMPL_FRAC*100, "% of data ", Sys.time()))
 p <- profvis({
   # LOAD DATA ----------------
-  print(paste("Loading data...", Sys.time()))
-  df <- fread(DATA_PATH)
+  print(paste("Loading data from: ",DATA_PATH))
+  df <- fread(DATA_PATH) %>%
+    sample_frac(.,SMPL_FRAC) # sample only if SAMPLE variable is true
 
   # TRAIN TEST SPLIT ----------------
   print(paste("Create train-test split...", Sys.time()))
   df$id <- 1:nrow(df)
   train <- df %>% sample_frac(.95)
   test  <- anti_join(df, train, by = 'id')
-  save(train, test, file = "results/scaled/train_test_FullDF.RData")
+  save(train, test, file = paste0("results/scaled/train_test_sample", SMPL_FRAC*100,".RData"))
 
 
   # DECISION TREE --------------
@@ -53,7 +58,7 @@ p <- profvis({
   dt <- rpart(Label ~ ., data = train, method = "class")
   stopCluster(cl)
 
-  save(dt, file = "results/scaled/decisiontree_FullDF.RData")
+  save(dt, file = paste0("results/scaled/decisiontree_sample", SMPL_FRAC*100,".RData"))
 
   # RANDOM FOREST ----------
   print(paste("Training Random Forest", Sys.time()))
@@ -66,7 +71,7 @@ p <- profvis({
   rf <- randomForest(as.factor(Label) ~ ., data = train)
   stopCluster(cl)
 
-  save(rf, file = "results/scaled/randomforest_FullDF.RData")
+  save(rf, file = paste0("results/scaled/randomforest_sample", SMPL_FRAC*100,".RData"))
 
   # XG-BOOST ----------
   print(paste("Training XG-Boost", Sys.time()))
@@ -89,7 +94,7 @@ p <- profvis({
                  objective = "binary:logistic")  # the objective function
   stopCluster(cl)
 
-  save(xgb, file = "results/scaled/xgboost_FullDF.RData")
+  save(xgb, file = paste0("results/scaled/xgboost_sample", SMPL_FRAC*100,".RData"))
 
   # LOGISTIC REGRESSION --------
   print(paste("Training Logistic Regression", Sys.time()))
@@ -103,7 +108,7 @@ p <- profvis({
   glm <- glm(formula = as.factor(Label) ~ ., data = train, family = "binomial")
   stopCluster(cl)
 
-  save(glm, file = "results/scaled/logregression_FullDF.RData")
+  save(glm, file = paste0("results/scaled/logregression_sample", SMPL_FRAC*100,".RData"))
 
 
   # KNN --------
@@ -118,7 +123,7 @@ p <- profvis({
   stopCluster(cl)
 
   # save
-  save(knn, file = "results/scaled/knn_FullDF.RData")
+  save(knn, file = paste0("results/scaled/knn_sample", SMPL_FRAC*100,".RData"))
 
 
   # Naive Bayes ------------
@@ -134,7 +139,7 @@ p <- profvis({
   stopCluster(cl)
 
   # save
-  save(nb, file = "results/scaled/nb_FullDF.RData")
+  save(nb, file = paste0("results/scaled/nb_sample", SMPL_FRAC*100,".RData"))
 
 
   # SVM --------
@@ -153,8 +158,8 @@ p <- profvis({
   stopCluster(cl)
 
   # save
-  save(svm, file = "results/scaled/svm_FullDF.RData")
+  save(svm, file = paste0("results/scaled/svm_sample", SMPL_FRAC*100,".RData"))
 })
 
-htmlwidgets::saveWidget(p, "ProfVis/03_Modelling_ProfVis_FullDF.html")
+htmlwidgets::saveWidget(p, paste0("ProfVis/03_Modelling_sample",SMPL_FRAC*100,".html"))
 print(paste("Saved ProfVis Analysis!", Sys.time()))

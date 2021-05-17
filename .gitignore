@@ -8,8 +8,8 @@
 # Large csv files in data directory
 data/*.csv
 # Large files in results directory
-results/scaled/logregression.RData
-results/scaled/train_test_FullDF.RData
+results/scaled/logregression*
+results/scaled/train_test*
 
 # User-specific files
 .Ruserdata

@@ -17,18 +17,13 @@ suppressPackageStartupMessages({
 
 DATA_PATH <- "data/final_dataset.csv"  # original balanced
 
-SAMPLE <- TRUE # TODO Select SAMPLE: (y/n)
-SMPL_FRAC <- 1 # 0.01, 0.1, 0.2, ... 0.9, 1.0
-
+# TODO select sample size
+SMPL_FRAC <- 0.9 # 0.01, 0.1, 0.2, ... 0.9, 1.0
 
 # set save path for final data automatically
-if(SAMPLE == TRUE){
-  SAVE_PATH <- paste0("data/final_dataset_preprocessed_sample",SMPL_FRAC*100,".csv") # sample
-  SAVE_PATH_SCALED <- paste0("data/final_dataset_preprocessed_sample",SMPL_FRAC*100,"_scaled.csv") # sample
-}else{
-  SAVE_PATH <- "data/final_dataset_preprocessed.csv" # full data
-  SAVE_PATH_SCALED <- "data/final_dataset_preprocessed_scaled.csv" # full data
-}
+SAVE_PATH <- paste0("data/final_dataset_preprocessed_sample",SMPL_FRAC*100,".csv") # sample
+SAVE_PATH_SCALED <- paste0("data/final_dataset_preprocessed_sample",SMPL_FRAC*100,"_scaled.csv") # sample
+
 print(paste0("Start Preprocessing on ", SMPL_FRAC*100, "% of data ", Sys.time()))
 p <- profvis({ # sample rate = 10ms
   # LOAD DATA ----------------
@@ -36,7 +31,7 @@ p <- profvis({ # sample rate = 10ms
 
   df_all <- fread(DATA_PATH)
   df <- df_all %>%
-    {if(SAMPLE) sample_frac(.,SMPL_FRAC) else .} # sample only if SAMPLE variable is true
+    sample_frac(.,SMPL_FRAC) # sample only if SAMPLE variable is true
   rm(df_all) # remove large df from memory
 
   # REMOVE SPACE FROM COLNAMES ----------------
