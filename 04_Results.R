@@ -8,14 +8,14 @@ library(grid)
 library(gridExtra)
 library(caret)
 
-load("results/scaled/train_test.RData")
-load("results/scaled/decisiontree.RData")
-load("results/scaled/knn.RData")
-load("results/scaled/logregression.RData")
-load("results/scaled/nb.RData")
-load("results/scaled/svm.RData")
-load("results/scaled/xgboost.RData")
-#load("results/scaled/randomforest.RData") #does not work
+load("results/scaled/train_test_sample1.RData")
+load("results/scaled/decisiontree_sample1.RData")
+load("results/scaled/knn_sample1.RData")
+load("results/scaled/logregression_sample1.RData")
+load("results/scaled/nb_sample1.RData")
+load("results/scaled/svm_sample1.RData")
+load("results/scaled/xgboost_sample1.RData")
+load("results/scaled/randomforest_sample1.RData") #does not work
 
 
 # DECISION TREE --------------

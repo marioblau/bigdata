@@ -18,13 +18,15 @@ suppressPackageStartupMessages({
 DATA_PATH <- "data/final_dataset.csv"  # original balanced
 
 # TODO select sample size
-SMPL_FRAC <- 0.9 # 0.01, 0.1, 0.2, ... 0.9, 1.0
+SMPL_FRAC <- 0.1 # 0.01, 0.1, 0.2, ... 0.9, 1.0
 
 # set save path for final data automatically
 SAVE_PATH <- paste0("data/final_dataset_preprocessed_sample",SMPL_FRAC*100,".csv") # sample
 SAVE_PATH_SCALED <- paste0("data/final_dataset_preprocessed_sample",SMPL_FRAC*100,"_scaled.csv") # sample
 
 print(paste0("Start Preprocessing on ", SMPL_FRAC*100, "% of data ", Sys.time()))
+start.time <- Sys.time()
+
 p <- profvis({ # sample rate = 10ms
   # LOAD DATA ----------------
   print(paste("Loading Data", Sys.time()))
@@ -115,9 +117,23 @@ p <- profvis({ # sample rate = 10ms
   print(paste("Save Scaled Data", Sys.time()))
   fwrite(df_scaled, SAVE_PATH_SCALED)
 })
-htmlwidgets::saveWidget(p, paste0("ProfVis/01_Preprocessing_sample",SMPL_FRAC*100,".html"))
+htmlwidgets::saveWidget(p, paste0("results/ProfVis/01_Preprocessing_sample",SMPL_FRAC*100,".html"))
 print(paste("Saved ProfVis Analysis!", Sys.time()))
 
+end.time <- Sys.time()
+
+# save sample and runtime
+runtime_data <- tibble(date = Sys.Date(),
+                       scriptname = "01_Preprocessing.R",
+                       sample = SMPL_FRAC,
+                       runtime = round(end.time - start.time,2))
+
+write.table( runtime_data,
+             file="results/runtimes.csv",
+             append = T,
+             sep=',',
+             row.names=F,
+             col.names=F)
 
 
 
