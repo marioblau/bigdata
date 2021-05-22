@@ -33,7 +33,7 @@ suppressPackageStartupMessages({
   library(tictoc)
 })
 
-SMPL_FRAC <- 0.5
+SMPL_FRAC <- 1
 
 DATA_PATH <- paste0("data/final_dataset_preprocessed_sample100_scaled.csv")
 
@@ -42,7 +42,7 @@ print(paste0("Start FINAL Modelling  on ", SMPL_FRAC*100, "% of data ", Sys.time
 p <- profvis({ # sample rate = 10ms
   # LOAD DATA ----------------
   print(paste("Loading data from: ",DATA_PATH))
-  df <- fread(DATA_PATH) %>%
+  df <- fread(DATA_PATH) %>% #TODO remove df again? chck with memchange
     sample_frac(.,SMPL_FRAC) # sample only if SAMPLE variable is true
 
   # TRAIN TEST SPLIT ----------------
@@ -50,6 +50,7 @@ p <- profvis({ # sample rate = 10ms
   df$id <- 1:nrow(df)
   train <- df %>% sample_frac(.95)
   test  <- anti_join(df, train, by = 'id')
+  print(paste("Save train-test split...", Sys.time()))
   save(train, test, file = paste0("results/scaled/train_test_sample", SMPL_FRAC*100,".RData"))
 
 
