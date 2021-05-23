@@ -21,7 +21,6 @@ suppressPackageStartupMessages({
   library(ranger)
   library(biglasso)
   library(FNN)
-  library(yaImpute)
   library(LiblineaR)
 
   # Package parallel computing
@@ -36,8 +35,8 @@ suppressPackageStartupMessages({
 
 SMPL_FRAC <- 1
 DATA_PATH <- paste0("data/final_dataset_preprocessed_sample100_scaled.csv")
-
 load("results/scaled/train_test_sample100_seed2021.RData")
+
 
 print(paste0("Start FINAL Modelling  on ", SMPL_FRAC*100, "% of data ", Sys.time()))
 
@@ -112,9 +111,9 @@ print(paste("Save Logistic Regression", Sys.time()))
 save(glm, file = paste0("results/scaled/logregression_sample", SMPL_FRAC*100,".RData"))
 rm(glm)
 
-# KNN -------- #TODO try ANN from yaImpute package
+# KNN --------
 print(paste("Training KNN", Sys.time()))
-knn <- FNN::knn(train[,-1], test[, -1], cl=train$Label, k=3, prob=TRUE)
+knn <- knn3(Label ~ ., data = train, k=3)
 
 print(paste("Save KNN", Sys.time()))
 save(knn, file = paste0("results/scaled/knn_sample", SMPL_FRAC*100,".RData"))

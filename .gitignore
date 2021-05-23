@@ -9,6 +9,7 @@
 data/*.csv
 # Large files in results directory
 results/scaled/logregression*
+results/scaled/knn*
 results/scaled/train_test*
 
 # User-specific files
