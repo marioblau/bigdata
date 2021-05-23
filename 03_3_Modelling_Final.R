@@ -51,7 +51,7 @@ train <- df %>% sample_frac(.95)
 test  <- anti_join(df, train, by = 'id')
 rm(df)
 print(paste("Save train-test split...", Sys.time()))
-save(train, test, file = paste0("results/scaled/train_test_sample", SMPL_FRAC*100,".RData"))
+#save(train, test, file = paste0("results/scaled/train_test_sample", SMPL_FRAC*100,".RData"))
 
 
 # DECISION TREE --------------
@@ -65,6 +65,7 @@ stopCluster(cl)
 print(paste("Save Decision Tree", Sys.time()))
 save(dt, file = paste0("results/scaled/decisiontree_sample", SMPL_FRAC*100,".RData"))
 rm(dt)
+
 # RANDOM FOREST ----------
 print(paste("Training Random Forest", Sys.time()))
 
@@ -74,6 +75,7 @@ rf <- ranger(as.factor(Label) ~ .,
 
 print(paste("Save Random Forest", Sys.time()))
 save(rf, file = paste0("results/scaled/randomforest_sample", SMPL_FRAC*100,".RData"))
+rm(rf)
 
 # XG-BOOST ----------
 print(paste("Training XG-Boost", Sys.time()))
@@ -92,6 +94,7 @@ stopCluster(cl)
 
 print(paste("Save XG-Boost", Sys.time()))
 save(xgb, file = paste0("results/scaled/xgboost_sample", SMPL_FRAC*100,".RData"))
+rm(xgb, train_mat, test_mat, train_dmat, test_dmat)
 
 # LOGISTIC REGRESSION --------
 print(paste("Training Logistic Regression", Sys.time()))
@@ -100,6 +103,7 @@ glm <- LiblineaR(train[,-1], train$Label, type = 1) # type:   0 – L2-regulariz
 
 print(paste("Save Logistic Regression", Sys.time()))
 save(glm, file = paste0("results/scaled/logregression_sample", SMPL_FRAC*100,".RData"))
+rm(glm)
 
 # KNN --------
 print(paste("Training KNN", Sys.time()))
@@ -107,6 +111,7 @@ knn <- FNN::knn(train[,-c(1)],test[,-c(1)],cl=train$Label,k=3,prob=TRUE)
 
 print(paste("Save KNN", Sys.time()))
 save(knn, file = paste0("results/scaled/knn_sample", SMPL_FRAC*100,".RData"))
+rm(knn)
 
 # Naive Bayes ------------
 print(paste("Training Naive Bayes", Sys.time()))
@@ -118,6 +123,7 @@ stopCluster(cl)
 
 print(paste("Save Naive Bayes", Sys.time()))
 save(nb, file = paste0("results/scaled/nb_sample", SMPL_FRAC*100,".RData"))
+rm(nb)
 
 # SVM --------
 print(paste("Training SVM", Sys.time()))
@@ -125,6 +131,7 @@ svm <- LiblineaR(train[,-1], train$Label, type = 1) # type:  1 – L2-regularize
 
 print(paste("Save SVM", Sys.time()))
 save(svm, file = paste0("results/scaled/svm_sample", SMPL_FRAC*100,".RData"))
+rm(svm)
 #})
 #htmlwidgets::saveWidget(p, paste0("results/ProfVis/03_3_Modelling_Final_sample",SMPL_FRAC*100,".html"))
 print(paste("Saved ProfVis Analysis!", Sys.time()))
