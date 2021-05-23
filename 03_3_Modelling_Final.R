@@ -15,13 +15,12 @@ suppressPackageStartupMessages({
   library(randomForest)
   library(xgboost)
   library(class)
-  library(e1071)
 
   # Packages ML models (faster implementation)
   library(ranger)
   library(biglasso)
-  library(FNN)
   library(LiblineaR)
+  library(parallelSVM)
 
   # Package parallel computing
   library(doParallel) # https://www.geeksforgeeks.org/random-forest-with-parallel-computing-in-r-programming/
@@ -133,8 +132,8 @@ rm(nb)
 
 # SVM --------
 print(paste("Training SVM", Sys.time()))
-svm <- LiblineaR(train[,-1], train$Label, type = 1) # type:  1 – L2-regularized L2-loss support vector classification (dual)
-
+#svm <- LiblineaR(train[,-1], train$Label, type = 2) # type:  1 – L2-regularized L2-loss support vector classification (dual)
+svm <- parallelSVM(train[,-1], as.factor(train$Label), numberCores = detectCores(all.tests = FALSE, logical = TRUE))
 print(paste("Save SVM", Sys.time()))
 save(svm, file = paste0("results/scaled/svm_sample", SMPL_FRAC*100,".RData"))
 rm(svm)

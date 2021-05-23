@@ -1,57 +1,78 @@
 #-------------------------------------------------------------------------------------
 # 03) Results
 #-------------------------------------------------------------------------------------
+rm(list = ls())
+suppressPackageStartupMessages({
+  # Models (for prediction)
+  library(caret)
+  library(randomForest)
+  library(ranger)
+  library(xgboost)
+  library(biglasso)
 
-# Evaluation
-library(pROC)
-library(grid)
-library(gridExtra)
-library(caret)
 
-load("results/scaled/train_test_sample1.RData")
-load("results/scaled/decisiontree_sample1.RData")
+  # Evaluation
+  library(pROC)
+  library(grid)
+  library(gridExtra)
+})
+# train test data
+load("results/scaled/train_test_sample100_seed2021.RData")
+
+# models
+#load("results/scaled/decisiontree_sample100.RData")
+#load("results/scaled/randomforest_sample100.RData")
+#load("results/scaled/xgboost_sample100.RData")
+#load("results/scaled/logregression_sample100.RData")
 load("results/scaled/knn_sample1.RData")
-load("results/scaled/logregression_sample1.RData")
-load("results/scaled/nb_sample1.RData")
-load("results/scaled/svm_sample1.RData")
-load("results/scaled/xgboost_sample1.RData")
-load("results/scaled/randomforest_sample1.RData") #does not work
+#load("results/scaled/nb_sample1.RData")
+#load("results/scaled/svm_sample1.RData")
 
 
 # DECISION TREE --------------
 dt.pred <- predict(dt, test, type = 'class')
 dt.confm <- confusionMatrix(as.factor(dt.pred), as.factor(test$Label), positive = "1")
+save(dt.confm, file = "results/confusionMatrices/decisiontree_sample100")
 
 # RANDOM FOREST ----------
-rf.pred <- predict(rf, newdata=test)
-rf.confm <- confusionMatrix(as.factor(rf.pred), as.factor(test$Label), positive = "1")
+rf.pred <- predict(rf, test, type = "response")
+rf.pred2 <- as.factor(max.col(rf.pred$predictions)-1)
+rf.confm <- confusionMatrix(rf.pred2, as.factor(test$Label), positive = "1")
+save(rf.confm, file = "results/confusionMatrices/randomforest_sample100")
 
 # XG-BOOST ----------
-train_mat <- as.matrix(train)
 test_mat <- as.matrix(test)
-train_dmat <- xgb.DMatrix(data = train_mat[,-c(1)], label = train_mat[,c(1)])
-test_dmat <- xgb.DMatrix(data = test_mat[,-c(1)], label = test_mat[,c(1)])
+test_dmat <- xgb.DMatrix(data = test_mat[,-1], label = test_mat[, 1])
 
 xgb.pred <- predict(xgb, newdata=test_dmat)
 xgb.pred <- round(xgb.pred,0)
 xgb.confm <- confusionMatrix(as.factor(xgb.pred), as.factor(test$Label), positive = "1")
+save(xgb.confm, file = "results/confusionMatrices/xgboost_sample100")
 
 # LOGISTIC-REGRESSION -------
-glm.pred <- predict(glm, type = "response", newdata = test)
-glm.pred <- ifelse(glm.pred < 0.5, 0, 1)
+plot(glm)
+coef(glm, lambda = 0.05, drop=TRUE)
+
+ytest_bigmat <- as.big.matrix(test[,-1], type = "double")
+glm.pred <- predict(glm, ytest_bigmat, type = "response", lambda = 0.01, drop=TRUE)
+glm.pred <- as.matrix(glm.pred)
+glm.pred <- round(glm.pred,0)
 glm.confm <- confusionMatrix(as.factor(glm.pred), as.factor(test$Label), positive = '1')
+save(glm.confm, file = "results/confusionMatrices/logregression_sample100")
 
 # KNN -------
-knn.pred <- knn
+knn.pred <- predict(knn, test[,-1])
 knn.confm <- confusionMatrix(as.factor(knn.pred), as.factor(test$Label), positive = '1')
 
+# Naive Bayes ----
+nb.pred <- predict(nb, newdata = test[,-1])
+nb.confm <- confusionMatrix(as.factor(nb.pred), as.factor(test$Label), positive = '1')
+
 # SVM -------
-svm.pred <- predict(svm, newdata = test[,-c(1)])
+svm.pred <- predict(svm, newdata = test[,-1])
 svm.confm <- confusionMatrix(as.factor(svm.pred), as.factor(test$Label), positive = '1')
 
-# Naive Bayes ----
-nb.pred <- predict(nb, newdata = test[,-c(1)])
-nb.confm <- confusionMatrix(as.factor(nb.pred), as.factor(test$Label), positive = '1')
+
 
 
 # ROC / AUC ----------
