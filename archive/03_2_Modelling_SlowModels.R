@@ -35,7 +35,7 @@ suppressPackageStartupMessages({
 
 SMPL_FRAC <- 0.01 # 0.01, 0.1, 0.2, ... 0.9, 1.0
 
-DATA_PATH <- paste0("data/final_dataset_preprocessed_sample100_scaled.csv")
+DATA_PATH <- paste0("../data/final_dataset_preprocessed_sample100_scaled.csv")
 
 print(paste0("Start training selected algorithms on ", SMPL_FRAC*100, "% of data ", Sys.time()))
 

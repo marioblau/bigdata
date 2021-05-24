@@ -42,7 +42,7 @@ print(paste0("Start FINAL Modelling  on ", SMPL_FRAC*100, "% of data ", Sys.time
 
 #p <- profvis({ # sample rate = 10ms
 # LOAD DATA ----------------
-print(paste("Loading data from: ",DATA_PATH))
+print(paste("Loading data from: ", DATA_PATH))
 set.seed(2021)
 df <- fread(DATA_PATH) %>%
   sample_frac(.,SMPL_FRAC, )
@@ -57,6 +57,28 @@ rm(df)
 print(paste("Save train-test split...", Sys.time()))
 save(train, test, file = paste0("data/train_test_sample", SMPL_FRAC*100,".RData"))
 
+# LOGISTIC REGRESSION --------
+print(paste("Training Logistic Regression", Sys.time()))
+xtrain_bigmat <- as.big.matrix(train[,-1])
+ytrain_bigmat <- as.big.matrix(train$Label)
+
+glm <- biglasso(xtrain_bigmat, ytrain_bigmat, family = "binomial", ncores = detectCores(all.tests = FALSE, logical = TRUE))
+
+print(paste("Save Logistic Regression", Sys.time()))
+save(glm, file = paste0("results/models/logregression_sample", SMPL_FRAC*100,".RData"))
+rm(glm)
+
+# Naive Bayes ------------
+print(paste("Training Naive Bayes", Sys.time()))
+
+cl <- makePSOCKcluster(4)
+registerDoParallel(cl, cores = detectCores(all.tests = FALSE, logical = TRUE))
+nb <- naiveBayes(x = train[,-1], y = train[, 1])
+stopCluster(cl)
+
+print(paste("Save Naive Bayes", Sys.time()))
+save(nb, file = paste0("results/models/nb_sample", SMPL_FRAC*100,".RData"))
+rm(nb)
 
 # DECISION TREE --------------
 print(paste("Training Decision Tree", Sys.time()))
@@ -100,17 +122,6 @@ print(paste("Save XG-Boost", Sys.time()))
 save(xgb, file = paste0("results/models/xgboost_sample", SMPL_FRAC*100,".RData"))
 rm(xgb)
 
-# LOGISTIC REGRESSION --------
-print(paste("Training Logistic Regression", Sys.time()))
-xtrain_bigmat <- as.big.matrix(train[,-1])
-ytrain_bigmat <- as.big.matrix(train$Label)
-
-glm <- biglasso(xtrain_bigmat, ytrain_bigmat, family = "binomial", ncores = detectCores(all.tests = FALSE, logical = TRUE))
-
-print(paste("Save Logistic Regression", Sys.time()))
-save(glm, file = paste0("results/models/logregression_sample", SMPL_FRAC*100,".RData"))
-rm(glm)
-
 # KNN --------
 print(paste("Training KNN", Sys.time()))
 system.time({
@@ -121,18 +132,6 @@ system.time({
 print(paste("Save KNN", Sys.time()))
 save(knn, file = paste0("results/models/knn_sample", SMPL_FRAC*100,".RData"))
 rm(knn)
-
-# Naive Bayes ------------
-print(paste("Training Naive Bayes", Sys.time()))
-
-cl <- makePSOCKcluster(4)
-registerDoParallel(cl, cores = detectCores(all.tests = FALSE, logical = TRUE))
-nb <- naiveBayes(x = train[,-1], y = train[, 1])
-stopCluster(cl)
-
-print(paste("Save Naive Bayes", Sys.time()))
-save(nb, file = paste0("results/models/nb_sample", SMPL_FRAC*100,".RData"))
-rm(nb)
 
 # SVM --------
 print(paste("Training SVM", Sys.time()))

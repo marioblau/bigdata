@@ -31,7 +31,7 @@ suppressPackageStartupMessages({
 RUN_PARALLEL <- TRUE
 SMPL_FRAC <- 0.05 # 0.01, 0.1, 0.2, ... 0.9, 1.0
 
-DATA_PATH <- paste0("data/final_dataset_preprocessed_sample100_scaled.csv")
+DATA_PATH <- paste0("../data/final_dataset_preprocessed_sample100_scaled.csv")
 
 print(paste0("Start Modelling (RUN_PARALLEL=", RUN_PARALLEL,") on ", SMPL_FRAC*100, "% of data ", Sys.time()))
 start.time <- Sys.time()
@@ -166,7 +166,7 @@ runtime_data <- tibble(date = Sys.Date(),
                        runtime = round(difftime(end.time,start.time, units = "secs"),2))
 
 write.table( runtime_data,
-             file="results/runtimes.csv",
+             file= "../results/runtimes.csv",
              append = T,
              sep=',',
              row.names=F,

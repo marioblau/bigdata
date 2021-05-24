@@ -100,6 +100,5 @@ glm.roc <- pROC::ggroc(glm.roc, alpha = 0.5, colour = "blue", linetype = 2, size
 
 
 
-
 g <- arrangeGrob(grobs = list(dt.roc,xgb.roc,knn.roc,glm.roc,glm.roc,nb.roc), ncol = 2, top='Receiver Operator Characteristics')
-ggsave(g, file="ROC.png", width = 10, height = 7)
+ggsave(g, file="results/plots/ROC.png", width = 10, height = 7)
