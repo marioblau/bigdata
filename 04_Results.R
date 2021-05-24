@@ -24,7 +24,7 @@ load("results/scaled/train_test_sample100_seed2021.RData")
 #load("results/scaled/randomforest_sample100.RData")
 #load("results/scaled/xgboost_sample100.RData")
 #load("results/scaled/logregression_sample100.RData")
-load("results/scaled/knn_sample1.RData")
+load("results/scaled/knn_sample100.RData")
 #load("results/scaled/nb_sample1.RData")
 #load("results/scaled/svm_sample1.RData")
 
@@ -60,8 +60,18 @@ glm.pred <- round(glm.pred,0)
 glm.confm <- confusionMatrix(as.factor(glm.pred), as.factor(test$Label), positive = '1')
 save(glm.confm, file = "results/confusionMatrices/logregression_sample100")
 
-# KNN -------
-knn.pred <- predict(knn, test[,-1])
+# KNN ------- #TODO predict in batches
+batches <- split(test[,-1], (seq(nrow(test))-1) %/% 200)
+knn.pred <- list()
+for(i in seq_along(batches)){
+  print(paste0(i,"/", length(batches), " ", Sys.time()))
+
+  batch.pred <- predict(knn, batches[[i]])
+  knn.pred <- append(knn.pred, batch.pred)
+  print(batch.pred)
+}
+
+
 knn.confm <- confusionMatrix(as.factor(knn.pred), as.factor(test$Label), positive = '1')
 
 # Naive Bayes ----

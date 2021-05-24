@@ -23,6 +23,13 @@ df <- fread(DATA_PATH) %>%
 # RUNTIME BY %-Data ----------------
 runtimes <- read.csv("results/runtimes.csv")
 
-ggplot(runtimes, aes(x=SMPL_FRAC, y=runtimes)) %>%
+runtimes_pre <- runtimes %>% filter(scriptname == "01_Preprocessing.R")
+p <- ggplot(runtimes_pre, aes(x=sample, y=runtime/60))+
   geom_point()+
-  geom_
+  geom_smooth(method = "lm", se=FALSE, color = "black", formula = y~x)+
+  ylab("Runtime (min)")+
+  xlab("% of Data")+
+  theme_minimal(base_size = 10)
+p
+ggsave(p, filename = "results/plots/runtime_preprocessing.png", width = 5, height = 5)
+

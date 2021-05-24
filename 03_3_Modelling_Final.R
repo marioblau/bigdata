@@ -110,7 +110,7 @@ print(paste("Save Logistic Regression", Sys.time()))
 save(glm, file = paste0("results/scaled/logregression_sample", SMPL_FRAC*100,".RData"))
 rm(glm)
 
-# KNN --------
+# KNN -------- # TODO try KD-tree from FNN package
 print(paste("Training KNN", Sys.time()))
 knn <- knn3(Label ~ ., data = train, k=3)
 
