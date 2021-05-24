@@ -15,12 +15,14 @@ suppressPackageStartupMessages({
   library(randomForest)
   library(xgboost)
   library(class)
+  library(e1071)
 
   # Packages ML models (faster implementation)
   library(ranger)
   library(biglasso)
   library(LiblineaR)
   library(parallelSVM)
+  library(FNN)
 
   # Package parallel computing
   library(doParallel) # https://www.geeksforgeeks.org/random-forest-with-parallel-computing-in-r-programming/
@@ -34,8 +36,7 @@ suppressPackageStartupMessages({
 
 SMPL_FRAC <- 1
 DATA_PATH <- paste0("data/final_dataset_preprocessed_sample100_scaled.csv")
-load("results/scaled/train_test_sample100_seed2021.RData")
-
+load("data/train_test_sample100_seed2021.RData")
 
 print(paste0("Start FINAL Modelling  on ", SMPL_FRAC*100, "% of data ", Sys.time()))
 
@@ -54,7 +55,7 @@ train <- df %>% sample_frac(.95)
 test  <- anti_join(df, train, by = 'id')
 rm(df)
 print(paste("Save train-test split...", Sys.time()))
-save(train, test, file = paste0("results/scaled/train_test_sample", SMPL_FRAC*100,".RData"))
+save(train, test, file = paste0("data/train_test_sample", SMPL_FRAC*100,".RData"))
 
 
 # DECISION TREE --------------
@@ -66,7 +67,7 @@ dt <- rpart(Label ~ ., data = train, method = "class")
 stopCluster(cl)
 
 print(paste("Save Decision Tree", Sys.time()))
-save(dt, file = paste0("results/scaled/decisiontree_sample", SMPL_FRAC*100,".RData"))
+save(dt, file = paste0("results/models/decisiontree_sample", SMPL_FRAC*100,".RData"))
 rm(dt)
 
 # RANDOM FOREST ----------
@@ -77,7 +78,7 @@ rf <- ranger(as.factor(Label) ~ .,
                 probability = TRUE)
 
 print(paste("Save Random Forest", Sys.time()))
-save(rf, file = paste0("results/scaled/randomforest_sample", SMPL_FRAC*100,".RData"))
+save(rf, file = paste0("results/models/randomforest_sample", SMPL_FRAC*100,".RData"))
 rm(rf)
 
 # XG-BOOST ----------
@@ -96,7 +97,7 @@ xgb <- xgboost(data = train_dmat, # the data
 stopCluster(cl)
 
 print(paste("Save XG-Boost", Sys.time()))
-save(xgb, file = paste0("results/scaled/xgboost_sample", SMPL_FRAC*100,".RData"))
+save(xgb, file = paste0("results/models/xgboost_sample", SMPL_FRAC*100,".RData"))
 rm(xgb)
 
 # LOGISTIC REGRESSION --------
@@ -107,15 +108,18 @@ ytrain_bigmat <- as.big.matrix(train$Label)
 glm <- biglasso(xtrain_bigmat, ytrain_bigmat, family = "binomial", ncores = detectCores(all.tests = FALSE, logical = TRUE))
 
 print(paste("Save Logistic Regression", Sys.time()))
-save(glm, file = paste0("results/scaled/logregression_sample", SMPL_FRAC*100,".RData"))
+save(glm, file = paste0("results/models/logregression_sample", SMPL_FRAC*100,".RData"))
 rm(glm)
 
-# KNN -------- # TODO try KD-tree from FNN package
+# KNN --------
 print(paste("Training KNN", Sys.time()))
-knn <- knn3(Label ~ ., data = train, k=3)
-
+system.time({
+  #knn <- FNN::get.knn(data = train, k=1, algorithm = "kd_tree")
+  knn <- FNN::knn(train = train[, -1], test = test[, -1], cl = as.factor(train$Label), k=1, algorithm = "kd_tree")
+  #knn <- FNN::knn(train = train[, -1], test = test[, -1], cl = as.factor(train$Label), k=1, algorithm = "cover_tree")
+})
 print(paste("Save KNN", Sys.time()))
-save(knn, file = paste0("results/scaled/knn_sample", SMPL_FRAC*100,".RData"))
+save(knn, file = paste0("results/models/knn_sample", SMPL_FRAC*100,".RData"))
 rm(knn)
 
 # Naive Bayes ------------
@@ -127,15 +131,15 @@ nb <- naiveBayes(x = train[,-1], y = train[, 1])
 stopCluster(cl)
 
 print(paste("Save Naive Bayes", Sys.time()))
-save(nb, file = paste0("results/scaled/nb_sample", SMPL_FRAC*100,".RData"))
+save(nb, file = paste0("results/models/nb_sample", SMPL_FRAC*100,".RData"))
 rm(nb)
 
 # SVM --------
 print(paste("Training SVM", Sys.time()))
-#svm <- LiblineaR(train[,-1], train$Label, type = 2) # type:  1 – L2-regularized L2-loss support vector classification (dual)
-svm <- parallelSVM(train[,-1], as.factor(train$Label), numberCores = detectCores(all.tests = FALSE, logical = TRUE))
+#svm <- parallelSVM(train[,-1], as.factor(train$Label), numberCores = detectCores(all.tests = FALSE, logical = TRUE))
+svm <- LiblineaR(train[,-1], train$Label, type = 2) # type:  1 – L2-regularized L2-loss support vector classification (dual)
 print(paste("Save SVM", Sys.time()))
-save(svm, file = paste0("results/scaled/svm_sample", SMPL_FRAC*100,".RData"))
+save(svm, file = paste0("results/models/svm_sample", SMPL_FRAC*100,".RData"))
 rm(svm)
 #})
 #htmlwidgets::saveWidget(p, paste0("results/ProfVis/03_3_Modelling_Final_sample",SMPL_FRAC*100,".html"))

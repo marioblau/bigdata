@@ -103,9 +103,9 @@ p <- profvis({ # sample rate = 10ms
   #df %>% sapply(., is.finite) %>% colSums() == nrow(df) # are all columns finite?
 
   # SAVE ------------
-  print(paste("Save Data", Sys.time()))
+  #print(paste("Save Data", Sys.time()))
 
-  fwrite(df, SAVE_PATH)
+  #fwrite(df, SAVE_PATH)
 
   # SCALING ------------
   print(paste("Scale Data", Sys.time()))

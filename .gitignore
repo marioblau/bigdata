@@ -6,11 +6,9 @@
 .RData
 
 # Large csv files in data directory
-data/*.csv
+data/*
 # Large files in results directory
-results/scaled/logregression*
-results/scaled/knn*
-results/scaled/train_test*
+results/models/logregression*
 
 # User-specific files
 .Ruserdata
