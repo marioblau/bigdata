@@ -7,8 +7,6 @@
 
 # Large csv files in data directory
 data/*
-# Large files in results directory
-results/models/logregression*
 
 # User-specific files
 .Ruserdata
