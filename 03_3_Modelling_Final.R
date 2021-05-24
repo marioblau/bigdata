@@ -30,17 +30,16 @@ suppressPackageStartupMessages({
   # Packages runtime analysis
   library(profvis)
   library(htmlwidgets)  # requires to install pandoc! --> https://pandoc.org/installing.html
-  library(tictoc)
   library(pryr)
 })
 
-SMPL_FRAC <- 1
+SMPL_FRAC <- 0.01
 DATA_PATH <- paste0("data/final_dataset_preprocessed_sample100_scaled.csv")
-load("data/train_test_sample100_seed2021.RData")
+#load("data/train_test_sample100_seed2021.RData")
 
 print(paste0("Start FINAL Modelling  on ", SMPL_FRAC*100, "% of data ", Sys.time()))
 
-#p <- profvis({ # sample rate = 10ms
+p <- profvis({ # sample rate = 10ms
 # LOAD DATA ----------------
 print(paste("Loading data from: ", DATA_PATH))
 set.seed(2021)
@@ -66,7 +65,7 @@ glm <- biglasso(xtrain_bigmat, ytrain_bigmat, family = "binomial", ncores = dete
 
 print(paste("Save Logistic Regression", Sys.time()))
 save(glm, file = paste0("results/models/logregression_sample", SMPL_FRAC*100,".RData"))
-rm(glm)
+rm(glm, xtrain_bigmat, ytrain_bigmat)
 
 # Naive Bayes ------------
 print(paste("Training Naive Bayes", Sys.time()))
@@ -120,15 +119,11 @@ stopCluster(cl)
 
 print(paste("Save XG-Boost", Sys.time()))
 save(xgb, file = paste0("results/models/xgboost_sample", SMPL_FRAC*100,".RData"))
-rm(xgb)
+rm(xgb, train_mat, test_mat, train_dmat, test_dmat)
 
 # KNN --------
 print(paste("Training KNN", Sys.time()))
-system.time({
-  #knn <- FNN::get.knn(data = train, k=1, algorithm = "kd_tree")
-  knn <- FNN::knn(train = train[, -1], test = test[, -1], cl = as.factor(train$Label), k=1, algorithm = "kd_tree")
-  #knn <- FNN::knn(train = train[, -1], test = test[, -1], cl = as.factor(train$Label), k=1, algorithm = "cover_tree")
-})
+knn <- FNN::knn(train = train[, -1], test = test[, -1], cl = as.factor(train$Label), k=1, algorithm = "kd_tree")
 print(paste("Save KNN", Sys.time()))
 save(knn, file = paste0("results/models/knn_sample", SMPL_FRAC*100,".RData"))
 rm(knn)
@@ -140,8 +135,8 @@ svm <- LiblineaR(train[,-1], train$Label, type = 2) # type:  1 – L2-regularize
 print(paste("Save SVM", Sys.time()))
 save(svm, file = paste0("results/models/svm_sample", SMPL_FRAC*100,".RData"))
 rm(svm)
-#})
-#htmlwidgets::saveWidget(p, paste0("results/ProfVis/03_3_Modelling_Final_sample",SMPL_FRAC*100,".html"))
+})
+htmlwidgets::saveWidget(p, paste0("results/ProfVis/03_3_Modelling_Final_sample",SMPL_FRAC*100,".html"))
 print(paste("Saved ProfVis Analysis!", Sys.time()))
 
 # FINISH ------
