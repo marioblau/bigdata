@@ -67,25 +67,35 @@ print(paste("Save Logistic Regression", Sys.time()))
 save(glm, file = paste0("results/models/logregression_sample", SMPL_FRAC*100,".RData"))
 rm(glm, xtrain_bigmat, ytrain_bigmat)
 
-# Naive Bayes ------------
+# Naive Bayes ------------ # TODO
 print(paste("Training Naive Bayes", Sys.time()))
 
-cl <- makePSOCKcluster(4)
-registerDoParallel(cl, cores = detectCores(all.tests = FALSE, logical = TRUE))
-nb <- naiveBayes(x = train[,-1], y = train[, 1])
+ncores <- detectCores() #12
+cl <- makeCluster(ncores) # Create cluster with desired number of cores:
+registerDoParallel(cl) # Register cluster:
+getDoParWorkers() # Find out how many cores are being used
+nb <- train(Label ~ .,
+            data = train,
+            method = "nb")
 stopCluster(cl)
+registerDoSEQ()
 
 print(paste("Save Naive Bayes", Sys.time()))
 save(nb, file = paste0("results/models/nb_sample", SMPL_FRAC*100,".RData"))
 rm(nb)
 
-# DECISION TREE --------------
+# DECISION TREE -------------- # TODO
 print(paste("Training Decision Tree", Sys.time()))
 
-cl <- makePSOCKcluster(4)
-registerDoParallel(cl, cores = detectCores(all.tests = FALSE, logical = TRUE))
-dt <- rpart(Label ~ ., data = train, method = "class")
+ncores <- detectCores() #12
+cl <- makeCluster(ncores) # Create cluster with desired number of cores:
+registerDoParallel(cl) # Register cluster:
+getDoParWorkers() # Find out how many cores are being used
+nb <- train(Label ~ .,
+            data = train,
+            method = "dt")
 stopCluster(cl)
+registerDoSEQ()
 
 print(paste("Save Decision Tree", Sys.time()))
 save(dt, file = paste0("results/models/decisiontree_sample", SMPL_FRAC*100,".RData"))
@@ -96,30 +106,30 @@ print(paste("Training Random Forest", Sys.time()))
 
 rf <- ranger(as.factor(Label) ~ .,
                 data = train,
+                importance = "impurity",
                 probability = TRUE)
 
 print(paste("Save Random Forest", Sys.time()))
 save(rf, file = paste0("results/models/randomforest_sample", SMPL_FRAC*100,".RData"))
 rm(rf)
 
-# XG-BOOST ----------
+# XG-BOOST ---------- # TODO
 print(paste("Training XG-Boost", Sys.time()))
 
-train_mat <- as.matrix(train)
-test_mat <- as.matrix(test)
-train_dmat <- xgb.DMatrix(data = train_mat[,-1], label = train_mat[, 1])
-test_dmat <- xgb.DMatrix(data = test_mat[,-1], label = test_mat[, 1])
-
-cl <- makePSOCKcluster(4)
-registerDoParallel(cl, cores = detectCores(all.tests = FALSE, logical = TRUE))
-xgb <- xgboost(data = train_dmat, # the data
-               nround = 2, # max number of boosting iterations
-               objective = "binary:logistic")  # the objective function
+ncores <- detectCores() #12
+cl <- makeCluster(ncores) # Create cluster with desired number of cores:
+registerDoParallel(cl) # Register cluster:
+getDoParWorkers() # Find out how many cores are being used
+nb <- train(Label ~ .,
+            data = train,
+            method = "xgbTree")
+stopCluster(cl)
+registerDoSEQ()
 stopCluster(cl)
 
 print(paste("Save XG-Boost", Sys.time()))
 save(xgb, file = paste0("results/models/xgboost_sample", SMPL_FRAC*100,".RData"))
-rm(xgb, train_mat, test_mat, train_dmat, test_dmat)
+rm(xgb)
 
 # KNN --------
 print(paste("Training KNN", Sys.time()))

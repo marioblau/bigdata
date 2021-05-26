@@ -79,38 +79,7 @@ save(svm.pred, file = "results/predictions/svm_pred_sample50.RData")
 
 # Accuracy ----------------------------------------------
 # load predictions
-load("results/predictions/logregression_pred_sample100.RData")
-load("results/predictions/naivebayes_sample100.RData")
-load("results/predictions/decisiontree_pred_sample100.RData")
-load("results/predictions/randomforest_pred_sample100.RData")
-load("results/predictions/xgboost_pred_sample100.RData")
-load("results/predictions/knn_pred_sample100.RData")
-load("results/predictions/svm_pred_sample50.RData")
 
-pred_list <- list(nb = nb.pred,
-                  glm = glm.pred,
-                  dt = dt.pred,
-                  rf = rf.pred,
-                  xgb = xgb.pred,
-                  knn = knn.pred,
-                  svm = svm.pred)
-sapply(pred_list, class)
-confm_list <- lapply(pred_list, function(x) confusionMatrix(data = x, reference = as.factor(test$Label), positive = "1"))
-acc_list <- lapply(pred_list, function (x) accuracy(test$Label, x))
-
-acc_df <- as.data.frame(acc_list)
-data <- tibble(models = names(acc_df), accuracy = t(acc_df)) %>%
-    arrange(.,by=desc(accuracy))
-
-p<- ggplot(data, aes(x=accuracy, y=reorder(models, accuracy), fill=as.factor(accuracy)))+
-  geom_bar(stat='identity', width = 0.2)+
-  scale_fill_brewer(palette = "RdYlGn")+
-  coord_cartesian(xlim = c(0, 1))+
-  ggtitle("Accuracy of final models")+
-  theme_minimal()+
-  theme(legend.position = "none")
-p
-ggsave(p, filename = "results/plots/accuracy.png", width = 5, height = 5)
 
 
 # Confusion Matrices ----------------------------------------------
@@ -144,3 +113,6 @@ glm.roc <- pROC::ggroc(glm.roc, alpha = 0.5, colour = "blue", linetype = 2, size
 
 g <- arrangeGrob(grobs = list(dt.roc,xgb.roc,knn.roc,glm.roc,glm.roc,nb.roc), ncol = 2, top='Receiver Operator Characteristics')
 ggsave(g, file="results/plots/ROC.png", width = 10, height = 7)
+
+# ROC / AUC ----------
+str(dt)
