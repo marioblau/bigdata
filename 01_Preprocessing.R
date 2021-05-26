@@ -17,7 +17,6 @@ suppressPackageStartupMessages({
 
 DATA_PATH <- "data/final_dataset.csv"  # original balanced
 
-# TODO select sample size
 SMPL_FRAC <- 0.1 # 0.01, 0.1, 0.2, ... 0.9, 1.0
 
 # set save path for final data automatically

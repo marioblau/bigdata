@@ -67,7 +67,7 @@ print(paste("Save Logistic Regression", Sys.time()))
 save(glm, file = paste0("results/models/logregression_sample", SMPL_FRAC*100,".RData"))
 rm(glm, xtrain_bigmat, ytrain_bigmat)
 
-# Naive Bayes ------------ # TODO
+# Naive Bayes ------------
 print(paste("Training Naive Bayes", Sys.time()))
 
 ncores <- detectCores() #12
@@ -84,7 +84,7 @@ print(paste("Save Naive Bayes", Sys.time()))
 save(nb, file = paste0("results/models/nb_sample", SMPL_FRAC*100,".RData"))
 rm(nb)
 
-# DECISION TREE -------------- # TODO
+# DECISION TREE --------------
 print(paste("Training Decision Tree", Sys.time()))
 
 ncores <- detectCores() #12
@@ -113,7 +113,7 @@ print(paste("Save Random Forest", Sys.time()))
 save(rf, file = paste0("results/models/randomforest_sample", SMPL_FRAC*100,".RData"))
 rm(rf)
 
-# XG-BOOST ---------- # TODO
+# XG-BOOST ----------
 print(paste("Training XG-Boost", Sys.time()))
 
 ncores <- detectCores() #12
